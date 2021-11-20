@@ -10,7 +10,7 @@ const router = express.Router();
 // /admin/add-product => GET
 router.get('/add-product', isAuth, adminController.getAddProduct);
 
-// admin/products => GET
+// /admin/products => GET
 router.get('/products', isAuth, adminController.getProducts);
 
 // /admin/add-product => POST
