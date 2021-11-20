@@ -3,23 +3,41 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
+const csrf = require('csurf');
+const flash = require('connect-flash');
+
+const MONGO_DB_URI = 'mongodb+srv://Rostyslav:node-eng@cluster0.jr5ez.mongodb.net/shop?w=majority';
 
 const errorController = require('./controllers/error');
 const User = require('./models/user');
 
 const app = express();
+const store = new MongoDBStore({
+  uri: MONGO_DB_URI,
+  collection: 'sessions',
+});
+const csrfProtection = csrf();
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const authRoutes = require('./routes/auth');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(session({ secret: 'my secret', resave: false, saveUninitialized: false, store }));
+app.use(csrfProtection);
+app.use(flash());
 
 app.use((req, res, next) => {
-  User.findById('61926b12c13ee221dd680b67')
+  if (!req.session.user) {
+    return next();
+  }
+  User.findById(req.session.user._id)
     .then((user) => {
       req.user = user;
       next();
@@ -27,26 +45,21 @@ app.use((req, res, next) => {
     .catch((err) => console.log(err));
 });
 
+app.use((req, res, next) => {
+  res.locals.isAunthenticated = req.sessions.isLoggedIn;
+  res.locals.csrfTocken = req.csrfToken();
+  next();
+});
+
 app.use('/admin', adminRoutes);
 app.use(shopRoutes);
+app.use(authRoutes);
 
 app.use(errorController.get404);
 
 mongoose
-  .connect('mongodb+srv://Rostyslav:node-eng@cluster0.jr5ez.mongodb.net/shop?retryWrites=true&w=majority')
+  .connect(MONGO_DB_URI)
   .then((result) => {
-    User.findOne().then((findedUser) => {
-      if (!findedUser) {
-        const user = new User({
-          name: 'Rostyslav',
-          email: 'ros@test.com',
-          cart: {
-            items: [],
-          },
-        });
-        user.save();
-      }
-    });
     app.listen(4000);
   })
   .catch((err) => {
