@@ -11,7 +11,8 @@ const flash = require('connect-flash');
 const errorController = require('./controllers/error');
 const User = require('./models/user');
 
-const MONGODB_URI = 'mongodb+srv://Rostyslav:node-eng@cluster0.jr5ez.mongodb.net/shop?w=majority';
+const MONGODB_URI =
+  'mongodb+srv://Rostyslav:node-eng@cluster0.jr5ez.mongodb.net/shop?w=majority';
 
 const app = express();
 const store = new MongoDBStore({
@@ -45,14 +46,14 @@ app.use((req, res, next) => {
     return next();
   }
   User.findById(req.session.user._id)
-    .then((user) => {
+    .then(user => {
       if (!user) {
         return next();
       }
       req.user = user;
       next();
     })
-    .catch((err) => {
+    .catch(err => {
       next(new Error(err));
     });
 });
@@ -78,9 +79,9 @@ app.use((error, req, res, next) => {
 
 mongoose
   .connect(MONGODB_URI)
-  .then((result) => {
+  .then(result => {
     app.listen(4000);
   })
-  .catch((err) => {
+  .catch(err => {
     console.log(err);
   });
