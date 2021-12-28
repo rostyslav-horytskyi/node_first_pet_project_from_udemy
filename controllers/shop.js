@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const stripe = require('stripe')(
-  'sk_test_51KBeK2DmejzIJJxe8RGRsUJLXi0jsiaHjDoksuGNr3EtrxXwPl574tYcKmcSnN8DViY9s9UVsTeCHCY4C7RlMn0a00cxGGzqed',
-);
+const stripe = require('stripe')(process.env.STRIPE_KEY);
+
+// stripe - sk_test_51KBeK2DmejzIJJxe8RGRsUJLXi0jsiaHjDoksuGNr3EtrxXwPl574tYcKmcSnN8DViY9s9UVsTeCHCY4C7RlMn0a00cxGGzqed
 
 const PDFDocument = require('pdfkit');
 
